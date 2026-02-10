@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GLB Gyro Viewer</title>
+<title>GLB Gyro Rotate</title>
 <style>
   html, body {
     width: 100%;
@@ -31,61 +31,78 @@
 const canvas = document.getElementById("renderCanvas");
 const engine = new BABYLON.Engine(canvas, true);
 
-const createScene = () => {
-  const scene = new BABYLON.Scene(engine);
-  scene.clearColor = new BABYLON.Color4(0, 0, 0, 1);
+const scene = new BABYLON.Scene(engine);
+scene.clearColor = new BABYLON.Color4(0, 0, 0, 1);
 
-  // Gyro camera (device orientation)
-  const camera = new BABYLON.DeviceOrientationCamera(
-    "gyroCam",
-    new BABYLON.Vector3(0, 0, -3),
-    scene
-  );
-  camera.setTarget(BABYLON.Vector3.Zero());
-  camera.attachControl(canvas, true);
+// Camera (fixed)
+const camera = new BABYLON.FreeCamera("cam", new BABYLON.Vector3(0, 0, -3), scene);
+camera.setTarget(BABYLON.Vector3.Zero());
 
-  // Light
-  const light = new BABYLON.HemisphericLight(
-    "light",
-    new BABYLON.Vector3(0, 1, 0),
-    scene
-  );
-  light.intensity = 1.2;
+// Light
+const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
+light.intensity = 1.2;
 
-  // Load GLB
-  BABYLON.SceneLoader.Append("", "model.glb", scene, function () {
-    // Center all meshes
-    const meshes = scene.meshes;
-    let min = new BABYLON.Vector3(Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE);
-    let max = new BABYLON.Vector3(-Number.MAX_VALUE, -Number.MAX_VALUE, -Number.MAX_VALUE);
+let rootMesh = null;
+
+// Load GLB
+BABYLON.SceneLoader.ImportMesh(
+  "",
+  "",
+  "model.glb",
+  scene,
+  function (meshes) {
+    // Create a parent root to rotate
+    rootMesh = new BABYLON.TransformNode("root", scene);
 
     meshes.forEach(m => {
-      if (m.getBoundingInfo) {
-        const b = m.getBoundingInfo().boundingBox;
-        min = BABYLON.Vector3.Minimize(min, b.minimumWorld);
-        max = BABYLON.Vector3.Maximize(max, b.maximumWorld);
-      }
+      m.parent = rootMesh;
     });
 
-    const center = min.add(max).scale(0.5);
-    meshes.forEach(m => {
-      m.position.subtractInPlace(center);
-    });
-  });
+    // Center model
+    const bounds = rootMesh.getHierarchyBoundingVectors();
+    const center = bounds.min.add(bounds.max).scale(0.5);
+    rootMesh.position.subtractInPlace(center);
+  }
+);
 
-  return scene;
-};
+// Gyro values
+let targetX = 0, targetY = 0;
+let currentX = 0, currentY = 0;
 
-const scene = createScene();
+// Handle device orientation
+function handleOrientation(e) {
+  const gamma = e.gamma || 0; // left-right
+  const beta = e.beta || 0;   // front-back
 
-// iOS permission for gyro
-if (typeof DeviceOrientationEvent !== "undefined" && typeof DeviceOrientationEvent.requestPermission === "function") {
-  document.body.addEventListener("click", () => {
-    DeviceOrientationEvent.requestPermission();
-  }, { once: true });
+  // Make upright phone = 0
+  const uprightBeta = beta - 90;
+
+  targetX = gamma * 0.01;        // Y rotation
+  targetY = uprightBeta * 0.01;  // X rotation
 }
 
+// iOS permission
+if (typeof DeviceOrientationEvent !== "undefined" && typeof DeviceOrientationEvent.requestPermission === "function") {
+  document.body.addEventListener("click", () => {
+    DeviceOrientationEvent.requestPermission().then(() => {
+      window.addEventListener("deviceorientation", handleOrientation);
+    });
+  }, { once: true });
+} else {
+  window.addEventListener("deviceorientation", handleOrientation);
+}
+
+// Render loop
 engine.runRenderLoop(() => {
+  if (rootMesh) {
+    // Smooth damping
+    currentX += (targetX - currentX) * 0.08;
+    currentY += (targetY - currentY) * 0.08;
+
+    rootMesh.rotation.y = currentX;
+    rootMesh.rotation.x = currentY;
+  }
+
   scene.render();
 });
 
