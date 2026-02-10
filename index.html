@@ -169,12 +169,21 @@ function animate() {
 }
 
 function handleOrientation(e) {
-  const gamma = e.gamma || 0; // left-right
-  const beta = e.beta || 0;   // front-back
+  const gamma = e.gamma || 0; // left-right tilt
+  const beta = e.beta || 0;   // front-back tilt
 
-  targetX = gamma * 0.3;
-  targetY = -beta * 0.3;
+  // When phone is upright, beta is around ~90
+  // We re-center it so upright = 0
+  const uprightBeta = beta - 90;
+
+  // Clamp values to avoid crazy angles
+  const clampedGamma = Math.max(-30, Math.min(30, gamma));
+  const clampedBeta  = Math.max(-30, Math.min(30, uprightBeta));
+
+  targetX = clampedGamma * 0.25;   // left-right look
+  targetY = clampedBeta * 0.25;    // up-down look
 }
+
 
 // iOS permission
 function requestPermissionIfNeeded() {
