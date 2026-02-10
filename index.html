@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gyro Parallax Demo</title>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    height: 100vh;
+    overflow: hidden;
+    background: #0b0b0b;
+    font-family: system-ui, sans-serif;
+  }
+
+  .scene {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    perspective: 800px;
+    overflow: hidden;
+  }
+
+  .layer {
+    position: absolute;
+    inset: -10%;
+    background-size: cover;
+    background-position: center;
+    will-change: transform;
+    transition: transform 0.05s linear;
+  }
+
+  .layer.bg {
+    background-image: url("https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=1600&auto=format&fit=crop");
+    transform: translateZ(-50px) scale(1.1);
+  }
+
+  .layer.mid {
+    background-image: url("https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=1600&auto=format&fit=crop");
+    mix-blend-mode: screen;
+    opacity: 0.6;
+  }
+
+  .layer.front {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: clamp(2rem, 6vw, 5rem);
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-shadow: 0 10px 40px rgba(0,0,0,0.8);
+  }
+
+  .hint {
+    position: fixed;
+    bottom: 20px;
+    width: 100%;
+    text-align: center;
+    color: #aaa;
+    font-size: 14px;
+    opacity: 0.8;
+  }
+</style>
+</head>
+<body>
+
+<div class="scene">
+  <div class="layer bg" data-depth="0.2"></div>
+  <div class="layer mid" data-depth="0.4"></div>
+  <div class="layer front" data-depth="0.8">
+    GYRO PARALLAX
+  </div>
+</div>
+
+<div class="hint">Tilt your phone 👀</div>
+
+<script>
+  const layers = document.querySelectorAll(".layer");
+
+  // iOS permission request
+  function requestPermissionIfNeeded() {
+    if (
+      typeof DeviceOrientationEvent !== "undefined" &&
+      typeof DeviceOrientationEvent.requestPermission === "function"
+    ) {
+      DeviceOrientationEvent.requestPermission()
+        .then(response => {
+          if (response === "granted") {
+            window.addEventListener("deviceorientation", handleOrientation);
+          } else {
+            alert("Permission denied for motion sensors.");
+          }
+        })
+        .catch(console.error);
+    } else {
+      window.addEventListener("deviceorientation", handleOrientation);
+    }
+  }
+
+  function handleOrientation(event) {
+    const beta = event.beta || 0;   // front-back tilt (-180 to 180)
+    const gamma = event.gamma || 0; // left-right tilt (-90 to 90)
+
+    layers.forEach(layer => {
+      const depth = layer.getAttribute("data-depth");
+      const moveX = (gamma / 30) * depth * 30;
+      const moveY = (beta / 30) * depth * 30;
+
+      layer.style.transform = `translate3d(${moveX}px, ${moveY}px, 0)`;
+    });
+  }
+
+  // Start on first touch (required for iOS)
+  document.body.addEventListener("click", requestPermissionIfNeeded, { once: true });
+</script>
+
+</body>
+</html>
