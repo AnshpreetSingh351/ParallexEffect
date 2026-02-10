@@ -3,36 +3,29 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Gyro 3D Monkey</title>
+<title>Gyro GLB Viewer</title>
 <style>
-  body {
-    margin: 0;
-    overflow: hidden;
-    background: #0b0b0b;
-    font-family: system-ui, sans-serif;
-  }
+  body { margin: 0; overflow: hidden; background: #0b0b0b; }
   #hint {
     position: fixed;
     bottom: 12px;
     width: 100%;
     text-align: center;
     color: #aaa;
+    font-family: system-ui, sans-serif;
     font-size: 14px;
-    z-index: 10;
-    pointer-events: none;
   }
 </style>
 </head>
 <body>
 
-<div id="hint">Tilt your phone to rotate the monkey 🐒</div>
+<div id="hint">Tilt your phone to rotate the model 📱</div>
 
-<!-- Three.js -->
-<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+<script src="https://unpkg.com/three@0.160.0/examples/js/loaders/GLTFLoader.js"></script>
 
 <script>
-let scene, camera, renderer, monkey;
+let scene, camera, renderer, model;
 let targetX = 0, targetY = 0;
 let currentX = 0, currentY = 0;
 
@@ -42,13 +35,8 @@ animate();
 function init() {
   scene = new THREE.Scene();
 
-  camera = new THREE.PerspectiveCamera(
-    45,
-    window.innerWidth / window.innerHeight,
-    0.1,
-    100
-  );
-  camera.position.set(0, 1.2, 3);
+  camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+  camera.position.set(0, 1, 3);
 
   renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
@@ -56,23 +44,19 @@ function init() {
   document.body.appendChild(renderer.domElement);
 
   // Lights
-  const hemi = new THREE.HemisphereLight(0xffffff, 0x222222, 1.2);
-  scene.add(hemi);
-
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x222222, 1.2));
   const dir = new THREE.DirectionalLight(0xffffff, 1);
   dir.position.set(5, 5, 5);
   scene.add(dir);
 
-  // Load GLTF
+  // Load GLB
   const loader = new THREE.GLTFLoader();
   loader.load("monkey.glb", (gltf) => {
-    monkey = gltf.scene;
-    monkey.scale.set(1, 1, 1);
-    scene.add(monkey);
+    model = gltf.scene;
+    scene.add(model);
   });
 
   window.addEventListener("resize", onResize);
-
   requestPermissionIfNeeded();
 }
 
@@ -87,25 +71,19 @@ function handleOrientation(e) {
   const gamma = e.gamma || 0; // left-right
   const beta = e.beta || 0;   // front-back
 
-  // Upright phone ~ beta ~ 90, re-center
-  const uprightBeta = beta - 90;
+  const uprightBeta = beta - 90; // make upright = 0
 
-  targetX = gamma * 0.02;        // Y rotation
-  targetY = uprightBeta * 0.02;  // X rotation
+  targetX = gamma * 0.02;
+  targetY = uprightBeta * 0.02;
 }
 
 // iOS permission
 function requestPermissionIfNeeded() {
-  if (
-    typeof DeviceOrientationEvent !== "undefined" &&
-    typeof DeviceOrientationEvent.requestPermission === "function"
-  ) {
+  if (typeof DeviceOrientationEvent !== "undefined" && typeof DeviceOrientationEvent.requestPermission === "function") {
     document.body.addEventListener("click", () => {
-      DeviceOrientationEvent.requestPermission().then(response => {
-        if (response === "granted") {
+      DeviceOrientationEvent.requestPermission().then(res => {
+        if (res === "granted") {
           window.addEventListener("deviceorientation", handleOrientation);
-        } else {
-          alert("Motion permission denied");
         }
       });
     }, { once: true });
@@ -117,13 +95,12 @@ function requestPermissionIfNeeded() {
 function animate() {
   requestAnimationFrame(animate);
 
-  if (monkey) {
-    // Smooth damping
+  if (model) {
     currentX += (targetX - currentX) * 0.08;
     currentY += (targetY - currentY) * 0.08;
 
-    monkey.rotation.y = currentX;
-    monkey.rotation.x = currentY;
+    model.rotation.y = currentX;
+    model.rotation.x = currentY;
   }
 
   renderer.render(scene, camera);
