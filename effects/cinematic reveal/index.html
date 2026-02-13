@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Apple Style Scroll Reveal</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif;
+}
+
+body {
+  background: #000;
+  color: #fff;
+  overflow-x: hidden;
+}
+
+/* Spacer before */
+.spacer {
+  height: 100vh;
+}
+
+/* Scene */
+.scene {
+  position: relative;
+  height: 200vh;
+}
+
+.sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Background image */
+.bg {
+  position: absolute;
+  inset: 0;
+  background-image: url("https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=1600&auto=format&fit=crop");
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  transform: scale(1.1);
+  transition: opacity 0.1s linear, transform 0.1s linear;
+}
+
+/* Subtle dark overlay */
+.bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(0,0,0,0.1), rgba(0,0,0,0.6));
+}
+
+/* Center text */
+.center-text {
+  position: relative;
+  z-index: 2;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  pointer-events: none;
+}
+
+.center-text h1 {
+  font-size: clamp(48px, 9vw, 140px);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 0.95;
+  transition: opacity 0.1s linear, transform 0.1s linear;
+}
+
+/* After section */
+.after {
+  min-height: 120vh;
+  padding: 120px 10vw;
+  background: #000;
+}
+
+.after h2 {
+  font-size: 48px;
+}
+</style>
+</head>
+<body>
+<style>
+.back-btn{
+  position:fixed; top:16px; left:16px; z-index:9999;
+  padding:10px 14px; border-radius:10px; border:1px solid rgba(255,255,255,.2);
+  background:rgba(0,0,0,.6); color:#fff; text-decoration:none; font-family:Inter,system-ui,sans-serif;
+  backdrop-filter: blur(6px); cursor:pointer;
+}
+.back-btn:hover{ transform: translateY(-1px); }
+</style>
+<button class="back-btn" onclick="goHome()">← Back</button>
+<script>
+function goHome(){
+  const p = window.location.pathname.replace(/\\/g,'/');
+  const idx = p.lastIndexOf('/effects/');
+  if(idx !== -1){
+    const home = p.slice(0, idx) + '/index.html';
+    window.location.href = home;
+  } else {
+    // fallback
+    window.location.href = '../index.html';
+  }
+}
+</script>
+
+<!-- Back Button -->
+<style>
+.back-btn {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 9999;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: rgba(0,0,0,0.6);
+  color: #fff;
+  text-decoration: none;
+  font-family: Inter, system-ui, sans-serif;
+  border: 1px solid rgba(255,255,255,0.2);
+  backdrop-filter: blur(6px);
+  transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+}
+.back-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+  background: rgba(20,20,20,0.8);
+}
+</style>
+<a class="back-btn" href="javascript:history.back()">← Back</a>
+
+
+<div class="spacer"></div>
+
+<section class="scene">
+  <div class="sticky">
+    <div class="bg" id="bg"></div>
+
+    <div class="center-text">
+      <h1 id="title">Luxury.<br>Reimagined.</h1>
+    </div>
+  </div>
+</section>
+
+<section class="after">
+  <h2>Clean. Calm. Cinematic.</h2>
+  <p>This is Apple-style product reveal scrolling.</p>
+</section>
+
+<script>
+const scene = document.querySelector(".scene");
+const bg = document.getElementById("bg");
+const title = document.getElementById("title");
+
+function clamp(v, min, max) {
+  return Math.min(Math.max(v, min), max);
+}
+
+window.addEventListener("scroll", () => {
+  const rect = scene.getBoundingClientRect();
+  const vh = window.innerHeight;
+
+  // progress from 0 to 1
+  const progress = clamp(1 - rect.bottom / (vh * 2), 0, 1);
+
+  // Image reveal
+  bg.style.opacity = progress;
+  bg.style.transform = `scale(${1.1 - progress * 0.1})`;
+
+  // Text fade out + slight move
+  const textFade = clamp(1 - progress * 1.2, 0, 1);
+  title.style.opacity = textFade;
+  title.style.transform = `translateY(${progress * -40}px)`;
+});
+</script>
+
+</body>
+</html>

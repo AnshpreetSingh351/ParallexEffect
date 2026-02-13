@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Pro Interactive Hero</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Inter, system-ui, sans-serif;
+}
+
+body {
+  height: 100vh;
+  background: radial-gradient(circle at top, #111, #000);
+  color: #fff;
+  overflow: hidden;
+}
+
+/* === HERO === */
+.hero {
+  position: relative;
+  height: 100vh;
+  width: 100%;
+  perspective: 1200px;
+  overflow: hidden;
+}
+
+/* Background layers */
+.layer {
+  position: absolute;
+  inset: -5%;
+  background-size: cover;
+  background-position: center;
+  will-change: transform;
+}
+
+.layer.bg1 {
+  background-image: url("https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=1600&auto=format&fit=crop");
+  filter: brightness(0.6);
+}
+
+.layer.bg2 {
+  background-image: url("https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=1600&auto=format&fit=crop");
+  mix-blend-mode: screen;
+  opacity: 0.4;
+}
+
+/* Dark overlay */
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.8));
+}
+
+/* Content */
+.content {
+  position: relative;
+  z-index: 2;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-left: 10vw;
+}
+
+h1 {
+  font-size: clamp(48px, 8vw, 120px);
+  line-height: 1;
+  margin-bottom: 20px;
+}
+
+p {
+  font-size: 20px;
+  max-width: 500px;
+  opacity: 0.8;
+}
+
+/* Magnetic button */
+.btn-wrap {
+  margin-top: 40px;
+  width: 180px;
+  height: 56px;
+  position: relative;
+}
+
+button {
+  width: 100%;
+  height: 100%;
+  border-radius: 999px;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  background: white;
+  color: black;
+  font-weight: 600;
+  transition: transform 0.2s ease;
+  will-change: transform;
+}
+</style>
+</head>
+<body>
+<style>
+.back-btn{
+  position:fixed; top:16px; left:16px; z-index:9999;
+  padding:10px 14px; border-radius:10px; border:1px solid rgba(255,255,255,.2);
+  background:rgba(0,0,0,.6); color:#fff; text-decoration:none; font-family:Inter,system-ui,sans-serif;
+  backdrop-filter: blur(6px); cursor:pointer;
+}
+.back-btn:hover{ transform: translateY(-1px); }
+</style>
+<button class="back-btn" onclick="goHome()">← Back</button>
+<script>
+function goHome(){
+  const p = window.location.pathname.replace(/\\/g,'/');
+  const idx = p.lastIndexOf('/effects/');
+  if(idx !== -1){
+    const home = p.slice(0, idx) + '/index.html';
+    window.location.href = home;
+  } else {
+    // fallback
+    window.location.href = '../index.html';
+  }
+}
+</script>
+
+<!-- Back Button -->
+<style>
+.back-btn {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 9999;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: rgba(0,0,0,0.6);
+  color: #fff;
+  text-decoration: none;
+  font-family: Inter, system-ui, sans-serif;
+  border: 1px solid rgba(255,255,255,0.2);
+  backdrop-filter: blur(6px);
+  transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+}
+.back-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+  background: rgba(20,20,20,0.8);
+}
+</style>
+<a class="back-btn" href="javascript:history.back()">← Back</a>
+
+
+<section class="hero" id="hero">
+  <div class="layer bg1" id="bg1"></div>
+  <div class="layer bg2" id="bg2"></div>
+  <div class="overlay"></div>
+
+  <div class="content" id="content">
+    <h1>AGI Majestic</h1>
+    <p>Move your mouse. Feel the depth. This is premium interactive motion.</p>
+
+    <div class="btn-wrap" id="btnWrap">
+      <button id="btn">Explore</button>
+    </div>
+  </div>
+</section>
+
+<script>
+const hero = document.getElementById("hero");
+const bg1 = document.getElementById("bg1");
+const bg2 = document.getElementById("bg2");
+const content = document.getElementById("content");
+const btnWrap = document.getElementById("btnWrap");
+const btn = document.getElementById("btn");
+
+let targetX = 0, targetY = 0;
+let currentX = 0, currentY = 0;
+
+hero.addEventListener("mousemove", (e) => {
+  const rect = hero.getBoundingClientRect();
+  const x = (e.clientX - rect.left) / rect.width - 0.5;
+  const y = (e.clientY - rect.top) / rect.height - 0.5;
+
+  targetX = x;
+  targetY = y;
+});
+
+function animate() {
+  // smooth follow
+  currentX += (targetX - currentX) * 0.08;
+  currentY += (targetY - currentY) * 0.08;
+
+  const rotateX = currentY * -10;
+  const rotateY = currentX * 10;
+
+  // 3D tilt of whole scene
+  content.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+
+  // parallax layers
+  bg1.style.transform = `translate(${currentX * 20}px, ${currentY * 20}px) scale(1.05)`;
+  bg2.style.transform = `translate(${currentX * 40}px, ${currentY * 40}px) scale(1.1)`;
+
+  requestAnimationFrame(animate);
+}
+
+animate();
+
+/* === MAGNETIC BUTTON === */
+btnWrap.addEventListener("mousemove", (e) => {
+  const rect = btnWrap.getBoundingClientRect();
+  const x = e.clientX - rect.left - rect.width / 2;
+  const y = e.clientY - rect.top - rect.height / 2;
+
+  btn.style.transform = `translate(${x * 0.3}px, ${y * 0.3}px)`;
+});
+
+btnWrap.addEventListener("mouseleave", () => {
+  btn.style.transform = `translate(0, 0)`;
+});
+</script>
+
+</body>
+</html>

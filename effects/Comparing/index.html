@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comparison Slider</title>
+    <style>
+        :root {
+            --slider-color: #ffffff;
+            --handle-size: 40px;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f0f2f5;
+        }
+
+        .comparison-container {
+            position: relative;
+            width: 90vw;
+            max-width: 900px;
+            aspect-ratio: 16 / 10;
+            overflow: hidden;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            background-color: #333;
+        }
+
+        /* The 'After' Image (The base layer) */
+        .comparison-container img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            pointer-events: none; /* Prevents dragging the image itself */
+        }
+
+        /* The 'Before' Image (The clipped layer) */
+        .img-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 50%; /* Starting position */
+            height: 100%;
+            overflow: hidden;
+            border-right: 3px solid var(--slider-color);
+            z-index: 2;
+        }
+
+        /* The actual range input (The logic) */
+        .slider-input {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            outline: none;
+            margin: 0;
+            cursor: ew-resize;
+            z-index: 10;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+
+        /* Styling the Draggable Handle (Chrome/Edge/Safari) */
+        .slider-input::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: var(--handle-size);
+            width: var(--handle-size);
+            background-color: var(--slider-color);
+            border: 3px solid #333;
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(0,0,0,0.3);
+            /* Icon for the handle */
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m18 8 4 4-4 4M6 8l-4 4 4 4"/></svg>');
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: 60%;
+        }
+
+        /* Styling the Draggable Handle (Firefox) */
+        .slider-input::-moz-range-thumb {
+            height: var(--handle-size);
+            width: var(--handle-size);
+            background-color: var(--slider-color);
+            border: 3px solid #333;
+            border-radius: 50%;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m18 8 4 4-4 4M6 8l-4 4 4 4"/></svg>');
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        /* Optional Labels */
+        .label {
+            position: absolute;
+            bottom: 20px;
+            padding: 8px 15px;
+            background: rgba(0,0,0,0.6);
+            color: white;
+            font-size: 14px;
+            text-transform: uppercase;
+            pointer-events: none;
+            z-index: 5;
+            border-radius: 4px;
+        }
+        .label-before { left: 20px; }
+        .label-after { right: 20px; }
+
+    </style>
+</head>
+<body>
+<style>
+.back-btn{
+  position:fixed; top:16px; left:16px; z-index:9999;
+  padding:10px 14px; border-radius:10px; border:1px solid rgba(255,255,255,.2);
+  background:rgba(0,0,0,.6); color:#fff; text-decoration:none; font-family:Inter,system-ui,sans-serif;
+  backdrop-filter: blur(6px); cursor:pointer;
+}
+.back-btn:hover{ transform: translateY(-1px); }
+</style>
+<button class="back-btn" onclick="goHome()">← Back</button>
+<script>
+function goHome(){
+  const p = window.location.pathname.replace(/\\/g,'/');
+  const idx = p.lastIndexOf('/effects/');
+  if(idx !== -1){
+    const home = p.slice(0, idx) + '/index.html';
+    window.location.href = home;
+  } else {
+    // fallback
+    window.location.href = '../index.html';
+  }
+}
+</script>
+
+<!-- Back Button -->
+<style>
+.back-btn {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 9999;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: rgba(0,0,0,0.6);
+  color: #fff;
+  text-decoration: none;
+  font-family: Inter, system-ui, sans-serif;
+  border: 1px solid rgba(255,255,255,0.2);
+  backdrop-filter: blur(6px);
+  transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+}
+.back-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+  background: rgba(20,20,20,0.8);
+}
+</style>
+<a class="back-btn" href="javascript:history.back()">← Back</a>
+
+
+    <div class="comparison-container">
+        <div class="label label-before">2D Plan</div>
+        <div class="label label-after">3D Render</div>
+
+        <img src="image/after.png" alt="After">
+
+        <div class="img-overlay">
+            <img src="image/before.png" alt="Before" id="before-img">
+        </div>
+
+        <input type="range" min="0" max="100" value="50" class="slider-input" id="slider">
+    </div>
+
+    <script>
+        const slider = document.getElementById('slider');
+        const overlay = document.querySelector('.img-overlay');
+        const beforeImg = document.getElementById('before-img');
+        const container = document.querySelector('.comparison-container');
+
+        // This function ensures the 'before' image stays the full width of the container
+        // even though its parent (.img-overlay) is being resized.
+        function updateWidth() {
+            beforeImg.style.width = container.offsetWidth + 'px';
+        }
+
+        slider.addEventListener('input', (e) => {
+            const value = e.target.value;
+            overlay.style.width = `${value}%`;
+        });
+
+        // Initialize and handle window resizing
+        window.addEventListener('resize', updateWidth);
+        updateWidth();
+    </script>
+
+</body>
+</html>

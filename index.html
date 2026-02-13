@@ -1,58 +1,143 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Main Menu</title>
-<style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Effects Playground</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: Inter, system-ui, sans-serif
+    }
 
-  body {
-    min-height: 100vh;
-    display: grid;
-    place-items: center;
-    background: #0b0b0b;
-    font-family: system-ui, sans-serif;
-    color: white;
-  }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #0b0b0b;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center
+    }
 
-  .container {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(140px, 1fr));
-    gap: 20px;
-    width: min(90%, 500px);
-  }
+    .container {
+      max-width: 1100px;
+      padding: 24px
+    }
 
-  a.button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 120px;
-    text-decoration: none;
-    color: white;
-    font-size: 1.2rem;
-    font-weight: 600;
-    border-radius: 16px;
-    background: linear-gradient(135deg, #1f2933, #0f172a);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-  }
+    h1 {
+      text-align: center;
+      margin-bottom: 24px;
+      letter-spacing: .08em
+    }
 
-  a.button:hover {
-    transform: translateY(-4px) scale(1.02);
-    box-shadow: 0 20px 50px rgba(0,0,0,0.7);
-  }
-</style>
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 16px
+    }
+
+    .btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 18px 14px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #1f2933, #0f172a);
+      color: #fff;
+      text-decoration: none;
+      border: 1px solid rgba(255, 255, 255, .08);
+      transition: transform .2s ease, box-shadow .2s ease, background .2s ease
+    }
+
+    .btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, .4);
+      background: linear-gradient(135deg, #334155, #111827)
+    }
+
+    .footer {
+      text-align: center;
+      opacity: .7;
+      margin-top: 18px;
+      font-size: 12px
+    }
+  </style>
 </head>
+
 <body>
+  <!-- Back Button -->
+  <style>
+    .back-btn {
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      z-index: 9999;
+      padding: 10px 14px;
+      border-radius: 10px;
+      background: rgba(0, 0, 0, 0.6);
+      color: #fff;
+      text-decoration: none;
+      font-family: Inter, system-ui, sans-serif;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(6px);
+      transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+    }
+    .grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
 
-<div class="container">
-  <a class="button" href="3d Gallary.html">3d Gallary</a>
-  <a class="button" href="blob distortion.html">Blob</a>
-  <a class="button" href="Depth Fog.html">Depth Fog</a>
-  <a class="button" href="ParallexImage.html">Parallex Image</a>
-  <a class="button" href="3d Model/3dmodel.html">3d Model</a>
-</div>
+/* Tablet */
+@media (max-width: 1024px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
 
+/* Mobile */
+@media (max-width: 600px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+    .back-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+      background: rgba(20, 20, 20, 0.8);
+    }
+  </style>
+
+
+
+  <div class="container">
+    <h1>✨ Effects Playground</h1>
+    <div class="grid">
+      <a class="btn" href="effects/Alpha effect/index.html"  >Alpha Effect</a>
+      <a class="btn" href="effects/cinematic reveal/index.html"  >Cinematic Reveal</a>
+      <a class="btn" href="effects/coming up/index.html"  >Coming Up</a>
+      <a class="btn" href="effects/Comparing/index.html"  >Comparing</a>
+      <a class="btn" href="effects/cursor reactive/index.html"  >Cursor Reactive</a>
+      <a class="btn" href="effects/flip/index.html"  >Flip</a>
+      <a class="btn" href="effects/lines/index.htm"  >Lines</a>
+      <a class="btn" href="effects/Mer vali animation/index .html"  >Mer Vali Animation</a>
+      <a class="btn" href="effects/Morphing/index.html"  >Morphing</a>
+      <a class="btn" href="effects/mouse animation/1/index.html"  >Mouse Animation 1</a>
+      <a class="btn" href="effects/mouse animation/2/index.html"  >Mouse Animation 2</a>
+      <a class="btn" href="effects/parallax/1/index.html"  >Parallax 1</a>
+      <a class="btn" href="effects/parallax/2/inde.html"  >Parallax 2</a>
+      <a class="btn" href="effects/parallax/3/index.html"  >Parallax 3</a>
+      <a class="btn" href="effects/spotlight/index.html"  >Spotlight</a>
+      <a class="btn" href="effects/text reveal animation/index.html"  >Text Reveal</a>
+      <a class="btn" href="effects/text reveal animation/2/index.html"  >Text Reveal 2</a>
+      <a class="btn" href="effects/Text reveal animation (blur)/index.html"  >Text Reveal Blur</a>
+    </div>
+    <div class="footer">Click any effect to open in a new tab</div>
+  </div>
 </body>
+
 </html>

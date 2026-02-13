@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Cinematic Parallax Scroll</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Inter, system-ui, sans-serif;
+}
+
+body {
+  background: #0b0d12;
+  color: #fff;
+  overflow-x: hidden;
+}
+
+/* Spacer sections */
+.section {
+  height: 120vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(32px, 6vw, 80px);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+
+/* Parallax Scene */
+.scene {
+  position: relative;
+  height: 200vh; /* scroll length */
+}
+
+.sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Layers */
+.layer {
+  position: absolute;
+  inset: -10%;
+  background-size: cover;
+  background-position: center;
+  will-change: transform;
+}
+
+/* Example images (replace these) */
+.layer.back {
+  background-image: url("https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=1600&auto=format&fit=crop");
+  filter: brightness(0.6) saturate(0.8);
+}
+
+.layer.mid {
+  background-image: url("https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=1600&auto=format&fit=crop");
+  mix-blend-mode: screen;
+  opacity: 0.6;
+}
+
+.layer.front {
+  background-image: url("https://images.unsplash.com/photo-1495567720989-cebdbdd97913?q=80&w=1600&auto=format&fit=crop");
+  filter: brightness(1.1);
+}
+
+/* Soft vignette */
+.vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(0,0,0,0) 40%, rgba(0,0,0,0.6) 100%);
+  pointer-events: none;
+}
+
+/* Title */
+.title {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(36px, 6vw, 96px);
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  text-align: center;
+  pointer-events: none;
+  text-shadow: 0 10px 40px rgba(0,0,0,0.6);
+}
+</style>
+</head>
+<body>
+<style>
+.back-btn{
+  position:fixed; top:16px; left:16px; z-index:9999;
+  padding:10px 14px; border-radius:10px; border:1px solid rgba(255,255,255,.2);
+  background:rgba(0,0,0,.6); color:#fff; text-decoration:none; font-family:Inter,system-ui,sans-serif;
+  backdrop-filter: blur(6px); cursor:pointer;
+}
+.back-btn:hover{ transform: translateY(-1px); }
+</style>
+<button class="back-btn" onclick="goHome()">← Back</button>
+<script>
+function goHome(){
+  const p = window.location.pathname.replace(/\\/g,'/');
+  const idx = p.lastIndexOf('/effects/');
+  if(idx !== -1){
+    const home = p.slice(0, idx) + '/index.html';
+    window.location.href = home;
+  } else {
+    // fallback
+    window.location.href = '../index.html';
+  }
+}
+</script>
+
+<!-- Back Button -->
+<style>
+.back-btn {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 9999;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: rgba(0,0,0,0.6);
+  color: #fff;
+  text-decoration: none;
+  font-family: Inter, system-ui, sans-serif;
+  border: 1px solid rgba(255,255,255,0.2);
+  backdrop-filter: blur(6px);
+  transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+}
+.back-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+  background: rgba(20,20,20,0.8);
+}
+</style>
+<a class="back-btn" href="javascript:history.back()">← Back</a>
+
+
+<div class="section">SCROLL DOWN</div>
+
+<section class="scene">
+  <div class="sticky">
+    <div class="layer back"></div>
+    <div class="layer mid"></div>
+    <div class="layer front"></div>
+    <div class="vignette"></div>
+    <div class="title">CINEMATIC DEPTH</div>
+  </div>
+</section>
+
+<div class="section">END</div>
+
+<script>
+const scene = document.querySelector(".scene");
+const sticky = document.querySelector(".sticky");
+const layers = {
+  back: document.querySelector(".layer.back"),
+  mid: document.querySelector(".layer.mid"),
+  front: document.querySelector(".layer.front")
+};
+
+let current = 0;
+let target = 0;
+
+// Smooth lerp
+function lerp(a, b, t) {
+  return a + (b - a) * t;
+}
+
+function animate() {
+  const rect = scene.getBoundingClientRect();
+  const scrollProgress = Math.min(Math.max(-rect.top / (scene.offsetHeight - window.innerHeight), 0), 1);
+
+  target = scrollProgress;
+  current = lerp(current, target, 0.08);
+
+  // Parallax depths
+  const backMove = current * 60;
+  const midMove = current * 120;
+  const frontMove = current * 200;
+
+  layers.back.style.transform = `translateY(${backMove}px) scale(1.1)`;
+  layers.mid.style.transform = `translateY(${midMove}px) scale(1.15)`;
+  layers.front.style.transform = `translateY(${frontMove}px) scale(1.2)`;
+
+  requestAnimationFrame(animate);
+}
+
+animate();
+</script>
+
+</body>
+</html>

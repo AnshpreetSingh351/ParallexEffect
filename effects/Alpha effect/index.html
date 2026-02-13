@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Hero Alpha Fade Demo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<style>
+.back-btn{
+  position:fixed; top:16px; left:16px; z-index:9999;
+  padding:10px 14px; border-radius:10px; border:1px solid rgba(255,255,255,.2);
+  background:rgba(0,0,0,.6); color:#fff; text-decoration:none; font-family:Inter,system-ui,sans-serif;
+  backdrop-filter: blur(6px); cursor:pointer;
+}
+.back-btn:hover{ transform: translateY(-1px); }
+</style>
+<button class="back-btn" onclick="goHome()">← Back</button>
+<script>
+function goHome(){
+  const p = window.location.pathname.replace(/\\/g,'/');
+  const idx = p.lastIndexOf('/effects/');
+  if(idx !== -1){
+    const home = p.slice(0, idx) + '/index.html';
+    window.location.href = home;
+  } else {
+    // fallback
+    window.location.href = '../index.html';
+  }
+}
+</script>
+
+<!-- Back Button -->
+<style>
+.back-btn {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 9999;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: rgba(0,0,0,0.6);
+  color: #fff;
+  text-decoration: none;
+  font-family: Inter, system-ui, sans-serif;
+  border: 1px solid rgba(255,255,255,0.2);
+  backdrop-filter: blur(6px);
+  transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+}
+.back-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+  background: rgba(20,20,20,0.8);
+}
+</style>
+<a class="back-btn" href="javascript:history.back()">← Back</a>
+
+
+  <section class="hero">
+    <div class="hero-content">
+      <h1>Alpha Fade Hero</h1>
+      <p>The image blends out from the bottom using real alpha masking</p>
+    </div>
+  </section>
+
+  <section class="content">
+    <h2>Next Section</h2>
+    <p>
+      See how the hero image smoothly fades into this background instead of
+      cutting off hard. This is done with CSS alpha masking.
+    </p>
+  </section>
+
+</body>
+</html>

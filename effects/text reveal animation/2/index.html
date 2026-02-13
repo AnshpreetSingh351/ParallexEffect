@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scroll Progressive Reveal</title>
+    <style>
+        body {
+            background-color: #0b1a2a; /* Dark blue aesthetic */
+            color: white;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        /* Large spacers to allow for scrolling */
+        .spacer {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1rem;
+            opacity: 0.3;
+        }
+
+        .reveal-section {
+            height: 200vh; /* Keeps the text in view while you scroll */
+            position: relative;
+            padding: 0 10%;
+        }
+
+        .sticky-container {
+            position: sticky;
+            top: 30%;
+            max-width: 1000px;
+        }
+
+        .reveal-text {
+            font-size: 4rem;
+            font-weight: 700;
+            line-height: 1.1;
+            letter-spacing: -2px;
+        }
+
+        .word {
+            display: inline-block;
+            margin-right: 15px;
+            opacity: 0.15; /* Base dimmed state */
+            transition: opacity 0.1s linear;
+        }
+    </style>
+</head>
+<body>
+<style>
+.back-btn{
+  position:fixed; top:16px; left:16px; z-index:9999;
+  padding:10px 14px; border-radius:10px; border:1px solid rgba(255,255,255,.2);
+  background:rgba(0,0,0,.6); color:#fff; text-decoration:none; font-family:Inter,system-ui,sans-serif;
+  backdrop-filter: blur(6px); cursor:pointer;
+}
+.back-btn:hover{ transform: translateY(-1px); }
+</style>
+<button class="back-btn" onclick="goHome()">← Back</button>
+<script>
+function goHome(){
+  const p = window.location.pathname.replace(/\\/g,'/');
+  const idx = p.lastIndexOf('/effects/');
+  if(idx !== -1){
+    const home = p.slice(0, idx) + '/index.html';
+    window.location.href = home;
+  } else {
+    // fallback
+    window.location.href = '../index.html';
+  }
+}
+</script>
+
+<!-- Back Button -->
+<style>
+.back-btn {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 9999;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: rgba(0,0,0,0.6);
+  color: #fff;
+  text-decoration: none;
+  font-family: Inter, system-ui, sans-serif;
+  border: 1px solid rgba(255,255,255,0.2);
+  backdrop-filter: blur(6px);
+  transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+}
+.back-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+  background: rgba(20,20,20,0.8);
+}
+</style>
+<a class="back-btn" href="javascript:history.back()">← Back</a>
+
+
+    <div class="spacer">Scroll down to reveal the text slowly ↓</div>
+
+    <section class="reveal-section" id="reveal-trigger">
+        <div class="sticky-container">
+            <h1 class="reveal-text" id="target-text">
+                Jesko Jets® is a private aviation operator with over 5,000 missions completed across 150+ countries. From international executives to global industries, our clients trust us to deliver on time, every time.
+            </h1>
+        </div>
+    </section>
+
+    <div class="spacer">You've reached the end.</div>
+
+    <script>
+        const textElement = document.getElementById('target-text');
+        const section = document.getElementById('reveal-trigger');
+        const wordsArray = textElement.innerText.split(' ');
+        
+        // Wrap words in spans
+        textElement.innerHTML = '';
+        wordsArray.forEach((word) => {
+            const span = document.createElement('span');
+            span.innerHTML = word + ' ';
+            span.classList.add('word');
+            textElement.appendChild(span);
+        });
+
+        const wordSpans = document.querySelectorAll('.word');
+
+        window.addEventListener('scroll', () => {
+            // Calculate how far the user has scrolled through the reveal section
+            const sectionRect = section.getBoundingClientRect();
+            const sectionHeight = section.offsetHeight;
+            
+            // Progress is a decimal from 0 to 1
+            let progress = -sectionRect.top / (sectionHeight - window.innerHeight);
+            progress = Math.max(0, Math.min(1, progress));
+
+            // Map progress to each word
+            wordSpans.forEach((span, index) => {
+                // This formula ensures words light up one after the other
+                const wordThreshold = index / wordSpans.length;
+                if (progress > wordThreshold) {
+                    span.style.opacity = 1;
+                } else {
+                    span.style.opacity = 0.15;
+                }
+            });
+        });
+    </script>
+</body>
+</html>

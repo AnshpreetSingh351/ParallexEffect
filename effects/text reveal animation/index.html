@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Cinematic Letter Reveal</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Inter, system-ui, sans-serif;
+}
+
+body {
+  background: linear-gradient(180deg, #2f7fb5, #0b1b2a);
+  color: #fff;
+}
+
+.spacer {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.6;
+}
+
+/* Section */
+.section {
+  min-height: 260vh; /* more scroll room for smoother feel */
+  padding: 120px 8vw;
+}
+
+/* Text block */
+.reveal {
+  max-width: 1100px;
+  font-size: clamp(28px, 4vw, 64px);
+  line-height: 1.1;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+
+/* Line */
+.line {
+  margin-bottom: 0.15em;
+  white-space: nowrap;
+}
+
+/* Characters */
+.char {
+  display: inline-block;
+  opacity: 0.08;                 /* start very soft */
+  filter: blur(6px);             /* start blurred */
+  transition:
+    opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    filter 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Muted lines start even softer */
+.line.muted .char {
+  opacity: 0.04;
+  filter: blur(7px);
+}
+</style>
+</head>
+<body>
+<style>
+.back-btn{
+  position:fixed; top:16px; left:16px; z-index:9999;
+  padding:10px 14px; border-radius:10px; border:1px solid rgba(255,255,255,.2);
+  background:rgba(0,0,0,.6); color:#fff; text-decoration:none; font-family:Inter,system-ui,sans-serif;
+  backdrop-filter: blur(6px); cursor:pointer;
+}
+.back-btn:hover{ transform: translateY(-1px); }
+</style>
+<button class="back-btn" onclick="goHome()">← Back</button>
+<script>
+function goHome(){
+  const p = window.location.pathname.replace(/\\/g,'/');
+  const idx = p.lastIndexOf('/effects/');
+  if(idx !== -1){
+    const home = p.slice(0, idx) + '/index.html';
+    window.location.href = home;
+  } else {
+    // fallback
+    window.location.href = '../index.html';
+  }
+}
+</script>
+
+<!-- Back Button -->
+<style>
+.back-btn {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 9999;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: rgba(0,0,0,0.6);
+  color: #fff;
+  text-decoration: none;
+  font-family: Inter, system-ui, sans-serif;
+  border: 1px solid rgba(255,255,255,0.2);
+  backdrop-filter: blur(6px);
+  transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+}
+.back-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+  background: rgba(20,20,20,0.8);
+}
+</style>
+<a class="back-btn" href="javascript:history.back()">← Back</a>
+
+
+<div class="spacer">SCROLL DOWN</div>
+
+<section class="section" id="section">
+  <div class="reveal" id="reveal">
+    <div class="line">with over 5,000 missions completed</div>
+    <div class="line">across 150+ countries. From international</div>
+    <div class="line">executives to global industries, our</div>
+    <div class="line muted">clients trust us to deliver on time, every</div>
+    <div class="line muted">time.</div>
+  </div>
+</section>
+
+<div class="spacer">END</div>
+
+<script>
+const section = document.getElementById("section");
+const reveal = document.getElementById("reveal");
+const lines = Array.from(reveal.querySelectorAll(".line"));
+
+// Wrap each character in a span
+lines.forEach(line => {
+  const text = line.textContent;
+  line.innerHTML = "";
+  for (let ch of text) {
+    if (ch === " ") {
+      line.innerHTML += " ";
+    } else {
+      const span = document.createElement("span");
+      span.className = "char";
+      span.textContent = ch;
+      line.appendChild(span);
+    }
+  }
+});
+
+const allLines = Array.from(reveal.querySelectorAll(".line"));
+const charsPerLine = allLines.map(line => Array.from(line.querySelectorAll(".char")));
+
+function clamp(v, min, max) {
+  return Math.min(Math.max(v, min), max);
+}
+
+// Smoothstep easing
+function smoothstep(t) {
+  return t * t * (3 - 2 * t);
+}
+
+function animate() {
+  const rect = section.getBoundingClientRect();
+
+  const start = window.innerHeight * 0.7;
+  const end = window.innerHeight * 0.2;
+
+  const progress = clamp((start - rect.top) / (start - end), 0, 1);
+
+  const totalLines = allLines.length;
+  const segment = 1 / totalLines; // each line gets its own scroll segment
+
+  allLines.forEach((line, lineIndex) => {
+    const lineStart = lineIndex * segment;
+    const lineProgressRaw = clamp((progress - lineStart) / segment, 0, 1);
+    const lineProgress = smoothstep(lineProgressRaw);
+
+    const chars = charsPerLine[lineIndex];
+    const charCount = chars.length;
+
+    chars.forEach((char, charIndex) => {
+      const cStart = charIndex / charCount;
+      const cEnd = (charIndex + 1) / charCount;
+
+      const pRaw = clamp((lineProgress - cStart) / (cEnd - cStart), 0, 1);
+      const p = smoothstep(pRaw);
+
+      const baseOpacity = line.classList.contains("muted") ? 0.04 : 0.08;
+
+      const opacity = baseOpacity + p * (1 - baseOpacity);
+      const blur = (1 - p) * 6; // blur -> sharp
+
+      char.style.opacity = opacity.toFixed(3);
+      char.style.filter = `blur(${blur.toFixed(2)}px)`;
+    });
+  });
+
+  requestAnimationFrame(animate);
+}
+
+animate();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Split Panel Parallax</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Inter, system-ui, sans-serif;
+}
+
+body {
+  background: #0f1116;
+  color: #fff;
+  overflow-x: hidden;
+}
+
+/* Intro / Outro */
+.section {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(32px, 6vw, 80px);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  opacity: 0.8;
+}
+
+/* Parallax Story */
+.story {
+  position: relative;
+  height: 250vh;
+}
+
+.sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  overflow: hidden;
+}
+
+/* Panels */
+.panel {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+.panel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.6));
+  pointer-events: none;
+}
+
+/* Images */
+.layer {
+  position: absolute;
+  inset: -20%;
+  background-size: cover;
+  background-position: center;
+  will-change: transform;
+}
+
+.panel.one .layer {
+  background-image: url("https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=1600&auto=format&fit=crop");
+}
+.panel.two .layer {
+  background-image: url("https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=1600&auto=format&fit=crop");
+}
+.panel.three .layer {
+  background-image: url("https://images.unsplash.com/photo-1495567720989-cebdbdd97913?q=80&w=1600&auto=format&fit=crop");
+}
+
+/* Text */
+.caption {
+  position: absolute;
+  bottom: 40px;
+  left: 40px;
+  right: 40px;
+  font-size: clamp(20px, 2.5vw, 36px);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  text-shadow: 0 10px 30px rgba(0,0,0,0.6);
+}
+</style>
+</head>
+<body>
+<style>
+.back-btn{
+  position:fixed; top:16px; left:16px; z-index:9999;
+  padding:10px 14px; border-radius:10px; border:1px solid rgba(255,255,255,.2);
+  background:rgba(0,0,0,.6); color:#fff; text-decoration:none; font-family:Inter,system-ui,sans-serif;
+  backdrop-filter: blur(6px); cursor:pointer;
+}
+.back-btn:hover{ transform: translateY(-1px); }
+</style>
+<button class="back-btn" onclick="goHome()">← Back</button>
+<script>
+function goHome(){
+  const p = window.location.pathname.replace(/\\/g,'/');
+  const idx = p.lastIndexOf('/effects/');
+  if(idx !== -1){
+    const home = p.slice(0, idx) + '/index.html';
+    window.location.href = home;
+  } else {
+    // fallback
+    window.location.href = '../index.html';
+  }
+}
+</script>
+
+<!-- Back Button -->
+<style>
+.back-btn {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 9999;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: rgba(0,0,0,0.6);
+  color: #fff;
+  text-decoration: none;
+  font-family: Inter, system-ui, sans-serif;
+  border: 1px solid rgba(255,255,255,0.2);
+  backdrop-filter: blur(6px);
+  transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+}
+.back-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+  background: rgba(20,20,20,0.8);
+}
+</style>
+<a class="back-btn" href="javascript:history.back()">← Back</a>
+
+
+<div class="section">SCROLL STORY</div>
+
+<section class="story">
+  <div class="sticky">
+    <div class="panel one">
+      <div class="layer"></div>
+      <div class="caption">Calm beginnings</div>
+    </div>
+    <div class="panel two">
+      <div class="layer"></div>
+      <div class="caption">Depth and contrast</div>
+    </div>
+    <div class="panel three">
+      <div class="layer"></div>
+      <div class="caption">A new perspective</div>
+    </div>
+  </div>
+</section>
+
+<div class="section">THE END</div>
+
+<script>
+const story = document.querySelector(".story");
+const panels = document.querySelectorAll(".panel .layer");
+
+let current = 0;
+let target = 0;
+
+function lerp(a, b, t) {
+  return a + (b - a) * t;
+}
+
+function animate() {
+  const rect = story.getBoundingClientRect();
+  const progress = Math.min(
+    Math.max(-rect.top / (story.offsetHeight - window.innerHeight), 0),
+    1
+  );
+
+  target = progress;
+  current = lerp(current, target, 0.08);
+
+  // Different speeds for each panel
+  panels[0].style.transform = `translateY(${current * 60}px) scale(1.1)`;
+  panels[1].style.transform = `translateY(${current * 120}px) scale(1.15)`;
+  panels[2].style.transform = `translateY(${current * 180}px) scale(1.2)`;
+
+  requestAnimationFrame(animate);
+}
+
+animate();
+</script>
+
+</body>
+</html>
