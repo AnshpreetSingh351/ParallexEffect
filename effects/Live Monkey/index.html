@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8" />
-  <title>Invisible Face-Tracking Monkey</title>
+  <title>Responsive Face-Tracking Monkey</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <script type="importmap">
@@ -37,7 +37,6 @@
       z-index: 0;
     }
 
-    /* Hidden video element - required for tracking but not displayed */
     #video {
       position: absolute;
       width: 1px;
@@ -59,14 +58,15 @@
     }
 
     .title {
-      font-size: clamp(2.5rem, 8vw, 6rem);
-      letter-spacing: 0.5em;
+      /* Mobile friendly font sizing */
+      font-size: clamp(1.5rem, 10vw, 5rem);
+      letter-spacing: 0.4em;
       font-weight: 900;
       text-transform: uppercase;
       background: linear-gradient(to bottom, #ffffff, #444);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      opacity: 0.6;
+      opacity: 0.5;
     }
   </style>
 </head>
@@ -89,35 +89,55 @@
 
     // --- 1. THREE.JS SETUP ---
     const canvas = document.getElementById("c");
-    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-    renderer.setPixelRatio(window.devicePixelRatio);
+    const renderer = new THREE.WebGLRenderer({ 
+        canvas, 
+        antialias: true,
+        powerPreference: "high-performance" 
+    });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
 
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.1, 100);
-    camera.position.set(0, 0, 6.5);
+    
+    // Adjusted FOV for better perspective
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+    camera.position.set(0, 0, 7);
 
     scene.add(new THREE.AmbientLight(0xffffff, 0.8));
     const l1 = new THREE.PointLight(0x00a2ff, 25); l1.position.set(-5, 2, 2); scene.add(l1);
     const l2 = new THREE.PointLight(0xff00d4, 25); l2.position.set(5, -2, 2); scene.add(l2);
 
     let monkey = null;
+    
+    // Function to handle responsive scaling
+    function getResponsiveScale() {
+        // If screen width is less than 768px (Mobile/Tablet)
+        if (window.innerWidth < 768) {
+            return 1.2; // Smaller for mobile to fit screen
+        }
+        return 1.9; // Smaller desktop size (was 1.9)
+    }
+
     new GLTFLoader().load('Monkey.glb', (gltf) => {
       monkey = gltf.scene;
       const box = new THREE.Box3().setFromObject(monkey);
       const center = box.getCenter(new THREE.Vector3());
       monkey.position.sub(center);
       scene.add(monkey);
-      monkey.scale.set(1.9, 1.9, 1.9);
+      
+      const s = getResponsiveScale();
+      monkey.scale.set(s, s, s);
     });
 
-    // --- 2. HIDDEN FACE TRACKING ---
+    // --- 2. FAST FACE TRACKING ---
     const video = document.getElementById('video');
     let faceRotation = { x: 0, y: 0 };
 
     async function setupCamera() {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+          video: { facingMode: "user", frameRate: { ideal: 60 } } 
+      });
       video.srcObject = stream;
       return new Promise((resolve) => { video.onloadedmetadata = () => resolve(video); });
     }
@@ -128,7 +148,7 @@
 
     faceMesh.setOptions({
       maxNumFaces: 1,
-      refineLandmarks: true,
+      refineLandmarks: false,
       minDetectionConfidence: 0.5,
       minTrackingConfidence: 0.5
     });
@@ -137,8 +157,6 @@
       if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
         const landmarks = results.multiFaceLandmarks[0];
         const nose = landmarks[1];
-
-        // Tracking logic: Flip the direction so it mimics a mirror
         faceRotation.y = (nose.x - 0.5) * -2.5;
         faceRotation.x = (nose.y - 0.5) * 2.0;
       }
@@ -146,10 +164,9 @@
 
     async function start() {
       await setupCamera();
-      // Start tracking loop
       const processFrame = async () => {
         await faceMesh.send({ image: video });
-        requestAnimationFrame(processFrame);
+        setTimeout(processFrame, 0); 
       };
       processFrame();
     }
@@ -160,21 +177,24 @@
     function animate() {
       requestAnimationFrame(animate);
       if (monkey) {
-        // Applying the movement with smooth LERP
-        monkey.rotation.y = THREE.MathUtils.lerp(monkey.rotation.y, faceRotation.y, 0.1);
-        monkey.rotation.x = THREE.MathUtils.lerp(monkey.rotation.x, faceRotation.x, 0.1);
-
-        // Breathing/Floating
+        monkey.rotation.y = THREE.MathUtils.lerp(monkey.rotation.y, faceRotation.y, 0.3);
+        monkey.rotation.x = THREE.MathUtils.lerp(monkey.rotation.x, faceRotation.x, 0.3);
         monkey.position.y = (Math.sin(Date.now() * 0.001) * 0.05) - 0.1;
       }
       renderer.render(scene, camera);
     }
     animate();
 
+    // --- 4. IMPROVED RESIZE LOGIC ---
     window.addEventListener("resize", () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
+      
+      if (monkey) {
+          const s = getResponsiveScale();
+          monkey.scale.set(s, s, s);
+      }
     });
   </script>
 </body>
